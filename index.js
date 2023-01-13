@@ -22,17 +22,16 @@ http
 
       case "/fileUploads":
         if (req.method.toLowerCase() === "post") {
-          const form = new formidable.IncomingForm();
-          form.parse(req, function (err, fields, files) {
-            const oldFilePath = files.image.filepath;
-            const newFilePath = path.join(
-              __dirname,
-              "uploads",
-              Date.now() + ".jpg"
-            );
-            fs.renameSync(oldFilePath, newFilePath);
-            res.write("file uploaded.");
+          if (!fs.existsSync(path.join(__dirname, "uploads", "files"))) {
+            fs.mkdirSync("uploads/files", { recursive: true });
+          }
+          const form = new formidable.IncomingForm({
+            uploadDir: path.join(__dirname, "uploads", "files"),
+            keepExtensions: true,
+            multiples: true,
+            allowEmptyFiles: false,
           });
+          form.parse(req, function (err, fields, files) {});
         } else {
           const htmlForm = fs.readFileSync("./fileUpload.html", "utf-8");
           res.write(htmlForm);
