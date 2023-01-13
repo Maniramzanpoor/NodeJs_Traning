@@ -1,7 +1,11 @@
-//? import commonJS use require
-// const { add, mines } = require("./Module");
-//? import Module use import
-import { add, mines } from "./Module.js"; //! importnat to file foramt (.js)
+const path = require('path');
 
-console.log(add(5, 6));
-console.log(mines(5, 2));
+console.log(__dirname); // name of the directory
+
+console.log(path.basename(__dirname)); // name of the file
+
+console.log(path.dirname(__filename)); // the end pramter in adress or the folder dir
+
+console.log(path.extname(__filename)); // the format of file 
+
+console.log(path.parse(path.dirname(__filename))); // parse the file address
