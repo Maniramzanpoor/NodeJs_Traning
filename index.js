@@ -4,7 +4,7 @@ const path = require("path");
 const formidable = require("formidable");
 const http = require("http");
 const { users, post, album } = require("./Api.js");
-
+const { uploadfile } = require("./modules/upload_file");
 http
   .createServer((req, res) => {
     switch (req.url) {
@@ -21,21 +21,8 @@ http
         break;
 
       case "/fileUploads":
-        if (req.method.toLowerCase() === "post") {
-          if (!fs.existsSync(path.join(__dirname, "uploads", "files"))) {
-            fs.mkdirSync("uploads/files", { recursive: true });
-          }
-          const form = new formidable.IncomingForm({
-            uploadDir: path.join(__dirname, "uploads", "files"),
-            keepExtensions: true,
-            multiples: true,
-            allowEmptyFiles: false,
-          });
-          form.parse(req, function (err, fields, files) {});
-        } else {
-          const htmlForm = fs.readFileSync("./fileUpload.html", "utf-8");
-          res.write(htmlForm);
-        }
+        const result = uploadfile(req, res);
+        res.write(result)
         break;
 
       default:
@@ -49,6 +36,6 @@ http
     }
     res.end();
   })
-  .listen(2500, () => {
+  .listen(3500, () => {
     console.log("http://localhost:2500");
   });
