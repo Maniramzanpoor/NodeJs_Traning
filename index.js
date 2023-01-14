@@ -1,41 +1,37 @@
-// http module
-const fs = require("fs");
-const path = require("path");
-const formidable = require("formidable");
 const http = require("http");
-const { users, post, album } = require("./Api.js");
-const { uploadfile } = require("./modules/upload_file");
+var { MongoClient } = require("mongodb"); // import the mongoclient
+const DB_Url = "mongodb://localhost:27017/"; // database url
+let mongoclient, db; // made a varible for db and mongoclient
+mongoclient = new MongoClient(DB_Url); // create a new obj from mongo
+mongoclient.connect((error, client) => {
+  db = client.db("NodeJs"); // set the db name
+  if (error) {
+    console.log(err);
+  }
+});
+
 http
   .createServer((req, res) => {
-    switch (req.url) {
-      case "/profile":
-        res.write(JSON.stringify(users));
+    const { url } = req;
+    let method = req.method.toLowerCase();
+    switch (url) {
+    
+      // select the list
+      case "/users/list": {
+        if (method == "get") {
+          db.collection("users")
+            .find({})
+            .toArray((error, result) => {
+              if (!error) return res.end(JSON.stringify(result));
+              return "have a some error";
+            });
+        }
         break;
-
-      case "/post":
-        res.write(JSON.stringify(post));
+      }
+      default: {
+        res.end("the page not loaded");
         break;
-
-      case "/album":
-        res.write(JSON.stringify(album));
-        break;
-
-      case "/fileUploads":
-        const result = uploadfile(req, res);
-        res.write(result)
-        break;
-
-      default:
-        res.write(
-          JSON.stringify({
-            status: 404,
-            message: "Route not found",
-          })
-        );
-        break;
+      }
     }
-    res.end();
   })
-  .listen(3500, () => {
-    console.log("http://localhost:2500");
-  });
+  .listen(2500, () => console.log("server is started"));
