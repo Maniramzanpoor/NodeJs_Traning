@@ -15,7 +15,34 @@ http
     const { url } = req;
     let method = req.method.toLowerCase();
     switch (url) {
-    
+      // insert user or create user
+      case "/users/insert": {
+        if (method == "post") {
+          let data = [];
+          req.on("data", (chunk) => {
+            data.push(chunk.toString());
+          });
+          req.on("end", () => {
+            const { name, Lastname, address, email } = JSON.parse(data);
+            db.collection("users").insert(
+              { name, Lastname, address, email },
+              (error, result) => {
+                if (result.acknowledged) {
+                  return res.end(
+                    JSON.stringify({
+                      name,
+                      Lastname,
+                      address,
+                      email,
+                    })
+                  );
+                }
+              }
+            );
+          });
+        }
+        break;
+      }
       // select the list
       case "/users/list": {
         if (method == "get") {
