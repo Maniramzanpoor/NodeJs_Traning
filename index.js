@@ -1,7 +1,10 @@
 const http = require("http");
-var { MongoClient } = require("mongodb"); // import the mongoclient
-const DB_Url = "mongodb://localhost:27017/"; // database url
-let mongoclient, db; // made a varible for db and mongoclient
+const url = require("url");
+var { MongoClient, ObjectId } = require("mongodb");
+const DB_Url = "mongodb://localhost:27017/"; //* database url
+
+let mongoclient, db; //? made a varible for db and mongoclient
+
 mongoclient = new MongoClient(DB_Url); // create a new obj from mongo
 mongoclient.connect((error, client) => {
   db = client.db("NodeJs"); // set the db name
@@ -9,13 +12,13 @@ mongoclient.connect((error, client) => {
     console.log(err);
   }
 });
-
 http
   .createServer((req, res) => {
-    const { url } = req;
+    const { url: path } = req;
     let method = req.method.toLowerCase();
+    const query = url.parse(path, true).query;
     switch (url) {
-      // insert user or create user
+      //!? insert user or create user :
       case "/users/insert": {
         if (method == "post") {
           let data = [];
@@ -43,7 +46,7 @@ http
         }
         break;
       }
-      // select the list
+      //!? select the list :
       case "/users/list": {
         if (method == "get") {
           db.collection("users")
@@ -55,8 +58,25 @@ http
         }
         break;
       }
+      //!? delete the data :
       default: {
-        res.end("the page not loaded");
+        if ((method = "delete" && path.includes("/users?id="))) {
+          const { id } = query; //* get the id from URL
+          if (ObjectId.isValid(id)) {
+            // check the id is ObjectID
+            db.collection("users").deleteOne(
+              { _id: ObjectId(id) },
+              (error, result) => {
+                if (!error) {
+                  return res.end(JSON.stringify(result));
+                }
+                return res.end("error in delete users");
+              }
+            );
+          } else {
+            res.end("ObjectId is notValid");
+          }
+        }
         break;
       }
     }
